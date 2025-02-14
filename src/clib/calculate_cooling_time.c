@@ -125,6 +125,12 @@ int local_calculate_cooling_time(chemistry_data *my_chemistry,
     my_uvb_rates.comp_xray = my_rates->comp_xray;
     my_uvb_rates.temp_xray = my_rates->temp_xray;
   }
+  //Units are ok because my_uvb_rates are multiplied by my_units->time_units;
+  // The RT values are multiplied by this factor in gizmo
+  if (my_chemistry->use_radiative_transfer == 1 ) {
+    my_uvb_rates.k27 += *my_fields->RT_HM_dissociation_rate;
+  }
+
 
   /* Check for a metal field. */
 
