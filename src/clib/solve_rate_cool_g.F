@@ -839,11 +839,11 @@
             write(0,'((16(1pe8.1)))') (edot(i),i=is+1,ie+1)
             write(0,'((16(l3)))') (itmask(i),i=is+1,ie+1)
             write(0,'("dens = ",1pe10.3,"; energy =", 1pe10.3)')
-     &         (d(i,j,k),e(i,j,k))
+     &         d(i,j,k),e(i,j,k)
             write(0,'("n_e = ",1pe10.3,"; n_HI =", 1pe10.3)')
-     &         (de(i,j,k),HI(i,j,k))
+     &         de(i,j,k),HI(i,j,k)
             write(0,'("tgas = ",1pe10.3,"; n_H2I =", 1pe10.3)')
-     &         (tgas(i),H2I(i,j,k))
+     &         tgas(i),H2I(i,j,k)
 
             if (exititmax .eq. 1) then
                ierr = 0
