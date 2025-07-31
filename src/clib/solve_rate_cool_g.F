@@ -1119,7 +1119,8 @@ c -------------------------------------------------------------------
      &        iH2shieldcustom
       real*8 temstart, temend, tgas1d(in), mmw(in), dom,
      &       dtemstart, dtemend
-      real*8 coolunit, tbase1, xbase1, dx_cgs, c_ljeans
+      real*8 coolunit, tbase1, xbase1, dx_cgs, c_ljeans,
+     &       dustatt, tau_uv_dust
       logical itmask(in), anydust
 
 !     Chemistry rates as a function of temperature
@@ -1194,7 +1195,7 @@ c -------------------------------------------------------------------
       integer i, n1
       real*8 factor, x, logtem0, logtem9, dlogtem, nh,
      &       d_logtem0, d_logtem9, d_dlogtem, divrho, N_H2,
-     &       f_shield, b_doppler, l_H2shield
+     &       N_HI, f_shield, b_doppler, l_H2shield
       real*8 k13_CID, k13_DT
 
 !     locals for H2 self-shielding as WG+19
@@ -1453,6 +1454,8 @@ c -------------------------------------------------------------------
                endif
 
                N_H2 = dom*H2I(i,j,k) * l_H2shield
+!     use the same length to estimate HI column density
+               N_HI = dom*HI(i,j,k) * l_H2shield
 
 ! update: self-shielding following Wolcott-Green & Haiman (2019)
 ! range of validity: T=100-8000 K, n<=1e7 cm^-3
@@ -1476,6 +1479,18 @@ c -------------------------------------------------------------------
      &              0.035_DKIND * exp(-8.5e-4_DKIND *
      &              sqrt(1._DKIND + x)) /
      &              sqrt(1._DKIND + x)
+
+!              add shielding of LW by dust following Hirashita & Ferrara (2005)
+               if (anydust) then
+!                 Eq. 5 from Hirashita & Ferrara (2005)
+!                 assuming a = 0.1 micron, delta = 2 g/cm^3, but with our
+!                 dust to gas ratio
+                  tau_uv_dust = 0.879d0 * 1.d-19 * N_HI * dust2gas(i)
+                  dustatt = max(exp(-tau_uv_dust), tiny8)
+                  f_shield = f_shield * dustatt
+               else
+                  dustatt = 1.d0
+               endif
 
 ! avoid f>1
                f_shield = min(f_shield, 1._DKIND)
