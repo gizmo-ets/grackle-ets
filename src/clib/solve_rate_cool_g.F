@@ -295,7 +295,7 @@
      &       HMp(in), H2Ip(in), H2IIp(in),
      &       dep(in), dedot(in),HIdot(in), dedot_prev(in),
      &       DIp(in), DIIp(in), HDIp(in), HIdot_prev(in),
-     &       k24shield(in), k25shield(in), k26shield(in),
+     &       k24shield(in), k25shield(in), k26shield(in), k27shield(in),
      &       k28shield(in), k29shield(in), k30shield(in),
      &       k31shield(in),
      &       k1 (in), k2 (in), k3 (in), k4 (in), k5 (in),
@@ -387,7 +387,7 @@
 !$omp&   HMp, H2Ip, H2IIp,
 !$omp&   dep, dedot,HIdot, dedot_prev,
 !$omp&   DIp, DIIp, HDIp, HIdot_prev,
-!$omp&   k24shield, k25shield, k26shield,
+!$omp&   k24shield, k25shield, k26shield, k27shield,
 !$omp&   k28shield, k29shield, k30shield,
 !$omp&   k31shield,
 !$omp&   k1 , k2 , k3 , k4 , k5,
@@ -526,10 +526,10 @@
      &               avgsighi, avgsighei, avgsigheii, piHI, piHeI,
      &               k1, k2, k3, k4, k5, k6, k7, k8, k9, k10,
      &               k11, k12, k13, k14, k15, k16, k17, k18,
-     &               k19, k22, k24, k25, k26, k28, k29, k30, k31,
+     &               k19, k22, k24, k25, k26, k27, k28, k29, k30, k31,
      &               k50, k51, k52, k53, k54, k55, k56, k57,
      &               k58, k13dd, k24shield, k25shield, k26shield,
-     &               k28shield, k29shield, k30shield,
+     &               k27shield, k28shield, k29shield, k30shield,
      &               k31shield, h2dust, ncrn, ncrd1, ncrd2, 
      &               t1, t2, tdef, logtem, indixe, 
      &               dom, coolunit, tbase1, xbase1, dx_cgs, c_ljeans,
@@ -792,7 +792,7 @@
      &                     k24, k25, k26, k27, k28, k29, k30,
      &                     k50, k51, k52, k53, k54, k55, k56, k57, k58, 
      &                     h2dust, rhoH,
-     &                     k24shield, k25shield, k26shield, 
+     &                     k24shield, k25shield, k26shield, k27shield,
      &                     k28shield, k29shield, k30shield, k31shield,
      &                     HIp, HIIp, HeIp, HeIIp, HeIIIp, dep,
      &                     HMp, H2Ip, H2IIp, DIp, DIIp, HDIp,
@@ -1097,10 +1097,11 @@ c -------------------------------------------------------------------
      &                avgsighi, avgsighei, avgsigheii, piHI, piHeI,
      &                k1, k2, k3, k4, k5, k6, k7, k8, k9, k10,
      &                k11, k12, k13, k14, k15, k16, k17, k18,
-     &                k19, k22, k24, k25, k26, k28, k29, k30, k31,
+     &                k19, k22, k24, k25, k26, k27, k28, k29, k30, k31,
      &                k50, k51, k52, k53, k54, k55, k56, k57,
      &                k58, k13dd, k24shield, k25shield, k26shield,
-     &                k28shield, k29shield, k30shield, k31shield,
+     &                k27shield, k28shield, k29shield, k30shield,
+     &                k31shield,
      &                h2dust, ncrn, ncrd1, ncrd2,
      &                t1, t2, tdef, logtem, indixe, 
      &                dom, coolunit, tbase1, xbase1, dx_cgs, c_ljeans,
@@ -1133,7 +1134,7 @@ c -------------------------------------------------------------------
      &       k54a(nratec), k55a(nratec), k56a(nratec), k57a(nratec),
      &       k58a(nratec), k13dda(nratec, 14), h2dusta(nratec, ndratec),
      &       ncrna(nratec), ncrd1a(nratec), ncrd2a(nratec),
-     &       k24, k25, k26, k28, k29, k30, k31,
+     &       k24, k25, k26, k27, k28, k29, k30, k31,
      &       piHI, piHeI,
      &       avgsighi, avgsighei, avgsigheii
 
@@ -1166,7 +1167,7 @@ c -------------------------------------------------------------------
      &       k55(in), k56(in), k57(in), k58(in),
      &       k13dd(in, 14), h2dust(in), 
      &       ncrn(in), ncrd1(in), ncrd2(in),
-     &       k24shield(in), k25shield(in), k26shield(in),
+     &       k24shield(in), k25shield(in), k26shield(in), k27shield(in),
      &       k28shield(in), k29shield(in), k30shield(in),
      &       k31shield(in)
 
@@ -1404,12 +1405,14 @@ c -------------------------------------------------------------------
       if (iradtrans == 0) then
          do i = is+1, ie+1
             if (itmask(i)) then
+               k27shield(i) = k27
                k31shield(i) = k31
             endif 
          enddo
       else
          do i = is+1, ie+1
             if (itmask(i)) then
+!     Note: we currently don't have a field for passing k27!
                k31shield(i) = k31 + kdissH2I(i,j,k)
             endif
          enddo
@@ -1480,6 +1483,7 @@ c -------------------------------------------------------------------
 ! avoid f>1
                f_shield = min(f_shield, 1._DKIND)
 
+               k27shield(i) = f_shield * k27shield(i)
                k31shield(i) = f_shield * k31shield(i)
             endif
          enddo
@@ -1489,6 +1493,7 @@ c -------------------------------------------------------------------
       if (iH2shieldcustom .gt. 0) then
         do i = is+1, ie+1
             if (itmask(i)) then
+              k27shield(i) = f_shield_custom(i,j,k) * k27shield(i)
               k31shield(i) = f_shield_custom(i,j,k) * k31shield(i)
             endif
         enddo
@@ -1972,7 +1977,7 @@ c
      &                     k24, k25, k26, k27, k28, k29, k30,
      &                     k50, k51, k52, k53, k54, k55, k56, k57, k58,
      &                     h2dust, rhoH,
-     &                     k24shield, k25shield, k26shield, 
+     &                     k24shield, k25shield, k26shield, k27shield,
      &                     k28shield, k29shield, k30shield, k31shield,
      &                     HIp, HIIp, HeIp, HeIIp, HeIIIp, dep,
      &                     HMp, H2Ip, H2IIp, DIp, DIIp, HDIp,
@@ -2013,7 +2018,7 @@ c -------------------------------------------------------------------
      &       k50(in), k51(in), k52(in), k53(in), k54(in),
      &       k55(in), k56(in), k57(in), k58(in), 
      &       h2dust(in), rhoH(in),
-     &       k24shield(in), k25shield(in), k26shield(in),
+     &       k24shield(in), k25shield(in), k26shield(in), k27shield(in),
      &       k28shield(in), k29shield(in), k30shield(in),
      &       k31shield(in),
      &       k24, k25, k26, k27, k28, k29, k30
@@ -2289,7 +2294,7 @@ c --- (C) Now do extra 3-species for molecular hydrogen ---
             acoef = (k8(i)  + k15(i))  * HI(i,j,k) + 
      &              (k16(i) + k17(i))  * HII(i,j,k) +  
      &	            k14(i) * de(i,j,k) + k19(i) * H2II(i,j,k)/2.0 +
-     &	            k27
+     &	            k27shield(i)
             HMp(i) = (scoef*dtit(i) + HM(i,j,k))
      &           / (1.0 + acoef*dtit(i))
 
