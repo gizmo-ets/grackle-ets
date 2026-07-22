@@ -129,6 +129,7 @@ int local_calculate_cooling_time(chemistry_data *my_chemistry,
   // The RT values are multiplied by this factor in gizmo
   if (my_chemistry->use_radiative_transfer == 1 ) {
     my_uvb_rates.k27 += *my_fields->RT_HM_dissociation_rate;
+    my_uvb_rates.k28 += *my_fields->RT_H2pH_dissociation_rate;
   }
 
 
